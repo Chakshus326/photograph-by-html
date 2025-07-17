@@ -1,0 +1,59 @@
+
+<html>
+<head>
+  <title>Click Photo & Send via Email</title>
+  <script src="https://cdn.emailjs.com/dist/email.min.js"></script>
+  <script>
+    window.onload = () => {
+      emailjs.init("YOUR_PUBLIC_KEY"); // <-- Replace this
+    };
+
+    function startCamera() {
+      navigator.mediaDevices.getUserMedia({ video: true })
+        .then(stream => {
+          document.getElementById("video").srcObject = stream;
+        });
+    }
+
+    function capturePhoto() {
+      const video = document.getElementById("video");
+      const canvas = document.getElementById("canvas");
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      const imageData = canvas.toDataURL("image/png");
+      document.getElementById("photo").src = imageData;
+      document.getElementById("photo").style.display = "block";
+    }
+
+    function sendEmail() {
+      const imageData = document.getElementById("photo").src;
+      const toEmail = document.getElementById("email").value;
+
+      const templateParams = {
+        to_email: toEmail,
+        image_base64: imageData
+      };
+
+      emailjs.send("YOUR_SERVICE_ID", "YOUR_TEMPLATE_ID", templateParams) // <-- Replace here
+        .then(() => {
+          alert("Email sent!");
+        })
+        .catch((err) => {
+          alert("Failed to send email: " + err.text);
+        });
+    }
+  </script>
+</head>
+<body onload="startCamera()">
+  <h2>Click Photo & Send via Email</h2>
+  
+  <video id="video" width="300" autoplay></video><br><br>
+  <button onclick="capturePhoto()">📷 Capture</button><br><br>
+
+  <canvas id="canvas" width="300" height="225" style="display:none;"></canvas>
+  <img id="photo" style="display:none;" /><br><br>
+
+  <input type="email" id="email" placeholder="Enter email" required /><br><br>
+  <button onclick="sendEmail()">📩 Send Photo</button>
+</body>
+</html>
